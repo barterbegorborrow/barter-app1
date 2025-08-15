@@ -1,10 +1,15 @@
-import Feed from './components/FeedClient'
+'use client'
+import { supabase } from '@/lib/supabase'
+import { useEffect } from 'react'
 
-export default function Home() {
-  return (
-    <main style={{ padding: 20 }}>
-      <h1>Barter Feed</h1>
-      <Feed />
-    </main>
-  )
+export default function HomePage() {
+  useEffect(() => {
+    const testConnection = async () => {
+      const { data, error } = await supabase.from('user').select()
+      console.log({ data, error })
+    }
+    testConnection()
+  }, [])
+
+  return <h1>Supabase Test</h1>
 }
