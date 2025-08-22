@@ -20,13 +20,11 @@ export default function Page() {
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1>Welcome to Barter App!</h1>
 
-      {/* Sign-in / Join placeholders */}
       <div style={{ margin: '1rem 0' }}>
         <button style={{ marginRight: '1rem' }}>Sign In</button>
         <button>Join</button>
       </div>
 
-      {/* New post / upload */}
       <div style={{ marginBottom: '2rem' }}>
         <input
           type="text"
@@ -38,7 +36,6 @@ export default function Page() {
         <button onClick={handlePost}>Post</button>
       </div>
 
-      {/* Feed */}
       <div>
         {posts.map((post) => (
           <div
