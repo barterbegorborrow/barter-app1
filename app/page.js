@@ -1,54 +1,51 @@
-"use client";
+'use client'; // needed if using client-side fetching
 
-import { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useEffect, useState } from 'react';
 
 export default function Page() {
-  const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState('');
 
   // Fetch posts from API
   useEffect(() => {
-    fetch("/api/posts")
+    fetch('/api/posts')
       .then(res => res.json())
-      .then(setPosts)
-      .catch(console.error);
+      .then(data => setPosts(data));
   }, []);
 
-  // Add new post
-  const addPost = async () => {
-    if (!session || !content) return;
-    const res = await fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: session.user.email, content }),
+  // Submit new post
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!content) return;
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
     });
     const newPost = await res.json();
-    setPosts([newPost[0], ...posts]);
-    setContent("");
+    setPosts([...posts, newPost]);
+    setContent('');
   };
 
-  if (!session) {
-    return (
-      <div style={{ padding: "2rem" }}>
-        <h1>Welcome to Barter App</h1>
-        <button onClick={() => signIn()}>Sign in</button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Welcome, {session.user.name}</h1>
-      <button onClick={() => signOut()}>Sign out</button>
+    <div>
+      <h1>Barter App Feed</h1>
 
-      <div style={{ marginTop: "1rem" }}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
+          placeholder="Write something..."
           value={content}
-          placeholder="Write a post"
-          onChange={e => setContent(e.target.value)}
-          style={{ width: "70%", marginRight: "0.5rem" }}
+          onChange={(e) => setContent(e.target.value)}
         />
-        <button onClick={addPost}>Pos
+        <button type="submit">Post</button>
+      </form>
+
+      <ul>
+        {posts.map(post => (
+          <li key={post.id}>{post.content}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
