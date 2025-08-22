@@ -8,14 +8,17 @@ export default function Page() {
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
 
+  // Fetch posts from API
   useEffect(() => {
     fetch("/api/posts")
       .then(res => res.json())
-      .then(setPosts);
+      .then(setPosts)
+      .catch(console.error);
   }, []);
 
+  // Add new post
   const addPost = async () => {
-    if (!session) return;
+    if (!session || !content) return;
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -27,22 +30,25 @@ export default function Page() {
   };
 
   if (!session) {
-    return <button onClick={() => signIn()}>Sign in</button>;
+    return (
+      <div style={{ padding: "2rem" }}>
+        <h1>Welcome to Barter App</h1>
+        <button onClick={() => signIn()}>Sign in</button>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div style={{ padding: "2rem" }}>
       <h1>Welcome, {session.user.name}</h1>
       <button onClick={() => signOut()}>Sign out</button>
-      <div>
-        <input value={content} onChange={e => setContent(e.target.value)} placeholder="Write a post" />
-        <button onClick={addPost}>Post</button>
-      </div>
-      <ul>
-        {posts.map(post => (
-          <li key={post.id}>{post.content} — {post.user_id}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+
+      <div style={{ marginTop: "1rem" }}>
+        <input
+          type="text"
+          value={content}
+          placeholder="Write a post"
+          onChange={e => setContent(e.target.value)}
+          style={{ width: "70%", marginRight: "0.5rem" }}
+        />
+        <button onClick={addPost}>Pos
