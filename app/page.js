@@ -1,104 +1,59 @@
 'use client';
-import { useState, useEffect } from "react";
-import { auth, db, storage } from "../firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-export default function HomePage() {
-  const [user] = useAuthState(auth);
-  const [username, setUsername] = useState("");
-  const [content, setContent] = useState("");
-  const [file, setFile] = useState(null);
-  const [feed, setFeed] = useState([]);
+import { useState } from 'react';
 
-  // Load feed
-  useEffect(() => {
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setFeed(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    return unsubscribe;
-  }, []);
+export default function Page() {
+  const [posts, setPosts] = useState([
+    { id: 1, user: 'Alice', content: 'Selling a bike!' },
+    { id: 2, user: 'Bob', content: 'Looking for a laptop.' },
+  ]);
 
-  const signIn = async () => {
-    const email = prompt("Email:");
-    const password = prompt("Password:");
-    await auth.signInWithEmailAndPassword(email, password).catch(() => {
-      alert("Sign in failed. Try again.");
-    });
-  };
+  const [newPost, setNewPost] = useState('');
 
-  const signUp = async () => {
-    const email = prompt("Email:");
-    const password = prompt("Password:");
-    await auth.createUserWithEmailAndPassword(email, password).catch(() => {
-      alert("Sign up failed. Try again.");
-    });
-  };
-
-  const signOut = () => auth.signOut();
-
-  const post = async () => {
-    if (!content && !file) return;
-    let fileUrl = null;
-    if (file) {
-      const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      fileUrl = await getDownloadURL(storageRef);
-    }
-    await addDoc(collection(db, "posts"), {
-      user: user.email,
-      content,
-      fileUrl: fileUrl || null,
-      createdAt: new Date()
-    });
-    setContent("");
-    setFile(null);
+  const handlePost = () => {
+    if (newPost.trim() === '') return;
+    setPosts([{ id: Date.now(), user: 'You', content: newPost }, ...posts]);
+    setNewPost('');
   };
 
   return (
-    <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Barter App</h1>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
+      <h1>Welcome to Barter App!</h1>
 
-      {!user ? (
-        <div>
-          <button onClick={signIn}>Sign In</button>
-          <button onClick={signUp}>Sign Up</button>
-        </div>
-      ) : (
-        <div>
-          <p>Signed in as {user.email}</p>
-          <button onClick={signOut}>Sign Out</button>
+      {/* Sign-in / Join placeholders */}
+      <div style={{ margin: '1rem 0' }}>
+        <button style={{ marginRight: '1rem' }}>Sign In</button>
+        <button>Join</button>
+      </div>
 
-          <div style={{ marginTop: "1rem" }}>
-            <input
-              type="text"
-              placeholder="Post content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-            <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-            <button onClick={post}>Post</button>
+      {/* New post / upload */}
+      <div style={{ marginBottom: '2rem' }}>
+        <input
+          type="text"
+          value={newPost}
+          onChange={(e) => setNewPost(e.target.value)}
+          placeholder="Share something..."
+          style={{ width: '70%', padding: '0.5rem', marginRight: '0.5rem' }}
+        />
+        <button onClick={handlePost}>Post</button>
+      </div>
+
+      {/* Feed */}
+      <div>
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            style={{
+              border: '1px solid #ccc',
+              padding: '1rem',
+              marginBottom: '1rem',
+              borderRadius: '8px',
+            }}
+          >
+            <strong>{post.user}</strong>: {post.content}
           </div>
-        </div>
-      )}
-
-      <h2>User Feed:</h2>
-      <ul>
-        {feed.map(item => (
-          <li key={item.id}>
-            <strong>{item.user}</strong>: {item.content}
-            {item.fileUrl && (
-              <div>
-                <a href={item.fileUrl} target="_blank">Download File</a>
-              </div>
-            )}
-          </li>
         ))}
-      </ul>
-    </main>
+      </div>
+    </div>
   );
-}
-
 }
