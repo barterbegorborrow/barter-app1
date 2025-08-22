@@ -1,46 +1,48 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 
-// Mock storage for posts
-let mockPosts = [
-  { id: 1, user: 'Alice', content: 'Welcome to Barter!' },
-  { id: 2, user: 'Bob', content: 'Hello world!' },
-];
-
-export default function HomePage() {
+export default function Page() {
+  const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
-  const [content, setContent] = useState('');
-  const [user, setUser] = useState('');
+  const [content, setContent] = useState("");
 
-  // Load posts on component mount
   useEffect(() => {
-    setPosts(mockPosts);
+    fetch("/api/posts")
+      .then(res => res.json())
+      .then(setPosts);
   }, []);
 
-  const handlePost = () => {
-    if (!user || !content) return alert('Enter username and content!');
-    const newPost = { id: Date.now(), user, content };
-    mockPosts = [newPost, ...mockPosts];
-    setPosts(mockPosts);
-    setContent('');
+  const addPost = async () => {
+    if (!session) return;
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: session.user.email, content }),
+    });
+    const newPost = await res.json();
+    setPosts([newPost[0], ...posts]);
+    setContent("");
   };
 
-  return (
-    <main style={{ padding: '2rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Barter App Feed</h1>
+  if (!session) {
+    return <button onClick={() => signIn()}>Sign in</button>;
+  }
 
-      <div style={{ marginBottom: '2rem' }}>
-        <input
-          type="text"
-          placeholder="Your name"
-          value={user}
-          onChange={(e) => setUser(e.target.value)}
-          style={{ marginRight: '0.5rem' }}
-        />
-        <input
-          type="text"
-          placeholder="What's on your mind?"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          style={{ marginRight: '0.5rem',
+  return (
+    <div>
+      <h1>Welcome, {session.user.name}</h1>
+      <button onClick={() => signOut()}>Sign out</button>
+      <div>
+        <input value={content} onChange={e => setContent(e.target.value)} placeholder="Write a post" />
+        <button onClick={addPost}>Post</button>
+      </div>
+      <ul>
+        {posts.map(post => (
+          <li key={post.id}>{post.content} — {post.user_id}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
