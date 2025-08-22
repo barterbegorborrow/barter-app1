@@ -35,3 +35,28 @@ export default function Home() {
     </main>
   )
 }
+export default function HomePage() {
+  const [email, setEmail] = useState('')
+
+  const signIn = async () => {
+    const { error } = await supabase.auth.signInWithOtp({ email })
+    if (error) {
+      alert(error.message)
+    } else {
+      alert('Check your email for a sign-in link!')
+    }
+  }
+
+  return (
+    <div>
+      <h1>Sign In</h1>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
+      />
+      <button onClick={signIn}>Sign In</button>
+    </div>
+  )
+}
