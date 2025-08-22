@@ -1,56 +1,51 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Page() {
+export default function Home() {
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState('');
 
-  // Fetch posts from API
-  useEffect(() => {
-    fetch('/api/posts')
-      .then(res => res.json())
-      .then(data => setPosts(data));
-  }, []);
+  const fetchPosts = async () => {
+    const res = await fetch('/api/posts');
+    const data = await res.json();
+    setPosts(data);
+  };
 
-  // Submit new post
+  useEffect(() => { fetchPosts(); }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content) return;
-    const res = await fetch('/api/posts', {
+
+    await fetch('/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
     });
-    const newPost = await res.json();
-    setPosts([...posts, newPost]);
     setContent('');
+    fetchPosts();
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto', padding: '2rem' }}>
-      <h1>Barter App Feed</h1>
-
+    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>Barter Feed</h1>
       <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
         <input
           type="text"
           placeholder="Write something..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          style={{ width: '80%', padding: '0.5rem' }}
+          style={{ width: '300px', padding: '0.5rem' }}
         />
-        <button type="submit" style={{ padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
-          Post
-        </button>
+        <button type="submit" style={{ marginLeft: '0.5rem', padding: '0.5rem 1rem' }}>Post</button>
       </form>
-
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {posts.map(post => (
-          <li key={post.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #ccc' }}>
-            {post.content}
-          </li>
+      <div>
+        {posts.length === 0 ? <p>No posts yet.</p> : posts.map((p) => (
+          <div key={p.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #ccc' }}>
+            {p.content} <small style={{ color: '#888' }}>{new Date(p.created_at).toLocaleString()}</small>
+          </div>
         ))}
-      </ul>
-    </div>
+      </div>
+    </main>
   );
 }
