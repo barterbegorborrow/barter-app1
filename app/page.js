@@ -1,4 +1,4 @@
-'use client'; // needed if using client-side fetching
+'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -28,22 +28,27 @@ export default function Page() {
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: '600px', margin: 'auto', padding: '2rem' }}>
       <h1>Barter App Feed</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
         <input
           type="text"
           placeholder="Write something..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          style={{ width: '80%', padding: '0.5rem' }}
         />
-        <button type="submit">Post</button>
+        <button type="submit" style={{ padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
+          Post
+        </button>
       </form>
 
-      <ul>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
         {posts.map(post => (
-          <li key={post.id}>{post.content}</li>
+          <li key={post.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #ccc' }}>
+            {post.content}
+          </li>
         ))}
       </ul>
     </div>
