@@ -6,7 +6,10 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
