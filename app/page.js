@@ -1,4 +1,8 @@
-'use client'
+'use client' // ensures client-side interactivity
+
+import { useState } from 'react'
+import { supabase } from '../lib/supabaseClient' // adjust path if needed
+use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
